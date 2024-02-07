@@ -10,19 +10,16 @@ const db = mysql.createConnection({
     password: 'golfclub',
     database: 'golfclub'
 });
-// Middleware per scrivere su un file di log
-app.use((req, res, next) => {
-    const logMessage = `${new Date().toISOString()} - Nuova richiesta ricevuta: ${req.method} ${req.url}\n`;
 
-    // Scrivi sul file di log
-    fs.appendFile(logFilePath, logMessage, (err) => {
-        if (err) {
-            console.error('Errore nella scrittura del file di log:', err);
-        }
-    });
-
+// Middleware per abilitare le richieste CORS
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); // Configura il dominio del client che desideri consentire
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
+
+
+
 app.get('/', (req, res) => {
     db.query('SELECT * FROM partecipanti', (err, result) => {
         if (err) {
@@ -31,6 +28,7 @@ app.get('/', (req, res) => {
             return;
         }
         res.json(result);
+        
     });
 });
 

@@ -1,29 +1,33 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elenco Partecipanti</title>
+    <title>Notifica Connessione al Database</title>
 </head>
 <body>
-    <h1>Elenco Partecipanti</h1>
-    <ul id="listaPartecipanti"></ul>
-
+    <h1 align="central">Golden Golf Tournament</h1>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            fetch('http://localhost:3000')
-                .then(response => response.json())
-                .then(partecipanti => {
-                    const listaPartecipanti = document.getElementById('listaPartecipanti');
-                    partecipanti.forEach(partecipante => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${partecipante.nome} ${partecipante.cognome} - ${partecipante.email}`;
-                        listaPartecipanti.appendChild(listItem);
-                    });
-                })
-                .catch(error => console.error('Errore durante il recupero dei dati:', error));
-        });
+        function sendNotification() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === 'granted') {
+                        var notification = new Notification('Connessione al database avvenuta!', {
+                            body: 'La connessione al database è stata stabilita con successo.',
+                        });
+                    }
+                });
+            }
+        }
+
+        fetch('http://localhost:3000/')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Se vuoi mostrare la notifica solo quando la richiesta ha successo
+                sendNotification();
+            })
+            .catch(error => console.error('Errore nella richiesta:', error));
     </script>
 </body>
 </html>
