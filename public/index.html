@@ -1,0 +1,29 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elenco Partecipanti</title>
+</head>
+<body>
+    <h1>Elenco Partecipanti</h1>
+    <ul id="listaPartecipanti"></ul>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('http://localhost:3000')
+                .then(response => response.json())
+                .then(partecipanti => {
+                    const listaPartecipanti = document.getElementById('listaPartecipanti');
+                    partecipanti.forEach(partecipante => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${partecipante.nome} ${partecipante.cognome} - ${partecipante.email}`;
+                        listaPartecipanti.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Errore durante il recupero dei dati:', error));
+        });
+    </script>
+</body>
+</html>
