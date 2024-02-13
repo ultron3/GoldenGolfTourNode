@@ -43,6 +43,16 @@ app.get('/referti', (req, res) => {
     });
 });
 
+app.get('/banca',(req,res)=>{
+    db.query('SELECT * FROM coordinate_bancarie',(err,result)=>{
+        if (err) {
+            console.error('Errore nella query:', err);
+            res.status(500).send('Errore nel server');
+            return;
+        }
+        res.json(result);
+    });
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
