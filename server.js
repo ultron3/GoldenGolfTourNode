@@ -54,6 +54,18 @@ app.get('/banca',(req,res)=>{
     });
 });
 
+app.get('/login',(req,res)=>{
+    db.query('SELECT * FROM login',(err,result)=>{
+        if (err) {
+            console.error('Errore nella query:', err);
+            res.status(500).send('Errore nel server');
+            return;
+        }
+        res.json(result);
+    });
+});
+
+
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server in ascolto sulla porta ${PORT}`);
