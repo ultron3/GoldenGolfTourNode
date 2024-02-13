@@ -18,8 +18,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-
-
+// route principale
 app.get('/', (req, res) => {
     db.query('SELECT * FROM partecipanti', (err, result) => {
         if (err) {
@@ -31,7 +30,7 @@ app.get('/', (req, res) => {
         
     });
 });
-
+// route per vedere i referti
 app.get('/referti', (req, res) => {
     db.query('SELECT * FROM referti', (err, result) => {
         if (err) {
@@ -42,7 +41,7 @@ app.get('/referti', (req, res) => {
         res.json(result);
     });
 });
-
+// route per vedere le coordinate bancarie
 app.get('/banca',(req,res)=>{
     db.query('SELECT * FROM coordinate_bancarie',(err,result)=>{
         if (err) {
@@ -53,7 +52,7 @@ app.get('/banca',(req,res)=>{
         res.json(result);
     });
 });
-
+// route per vedere le credenziali degli utenti
 app.get('/login',(req,res)=>{
     db.query('SELECT * FROM login',(err,result)=>{
         if (err) {
@@ -65,7 +64,7 @@ app.get('/login',(req,res)=>{
     });
 });
 
-
+// porta del server
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(`Server in ascolto sulla porta ${PORT}`);
