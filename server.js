@@ -4,6 +4,7 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const logFilePath = path.join(__dirname, 'server.log');
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -53,7 +54,7 @@ app.get('/banca',(req,res)=>{
     });
 });
 // route per vedere le credenziali degli utenti
-app.get('/login',(req,res)=>{
+app.get('/credenziali',(req,res)=>{
     db.query('SELECT * FROM login',(err,result)=>{
         if (err) {
             console.error('Errore nella query:', err);
@@ -63,6 +64,28 @@ app.get('/login',(req,res)=>{
         res.json(result);
     });
 });
+
+// Definisci la route per il login
+app.post('/login', (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    // Query per verificare le credenziali
+    const query = `SELECT * FROM login WHERE email = ? AND password = ? `;
+    db.query(query, [email,password], (err, results) => {
+        if (err) {
+            res.status(500).json({ error: 'Errore nel database' });
+            return;
+        }
+
+        if (results.length > 0) {
+            res.status(200).json({ message: 'Login riuscito' });
+        } else {
+            res.status(401).json({ error: 'Credenziali non valide' });
+        }
+    });
+});
+
 
 // porta del server
 const PORT = 3000;
