@@ -4,6 +4,8 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const logFilePath = path.join(__dirname, 'server.log');
+const puppeteer = require('puppeteer');
+
 
 const db = mysql.createConnection({
     host: 'localhost',
@@ -86,7 +88,66 @@ app.post('/login', (req, res) => {
     });
 });
 
+//Route per eseguire lo scraping del sito GesGolf e creare una nuova tabella nel database
+app.get('/scrape', async (req, res) => {
+    try {
+        // Inizializza il browser Puppeteer
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
 
+        // URL del sito da cui eseguire lo scraping
+        const url = 'https://www.gesgolf.it/GolfOnline/Clubs/classifiche.aspx?GaraId=592479&Anno=2024&Mese=2&circolo_id=638';
+        await page.goto(url);
+
+        // Esegui lo scraping dei dati desiderati
+        const data = await page.evaluate(() => {
+            const playerRows = Array.from(document.querySelectorAll('.tbody tr'));
+            return playerRows.map(row => {
+                const name = row.querySelector('.player-name').textContent.trim();
+                const score = row.querySelector('.player-score').textContent.trim();
+                return { name, score };
+            });
+        });
+
+        // Chiudi il browser Puppeteer
+        await browser.close();
+
+        // Crea una nuova tabella nel database per memorizzare i dati estratti
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS gesgolf.golfclub (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nome VARCHAR(255) NOT NULL,
+                punteggio VARCHAR(50) NOT NULL
+            )
+        `;
+        db.query(createTableQuery, (err, result) => {
+            if (err) {
+                console.error('Errore nella creazione della tabella nel database:', err);
+                res.status(500).json({ error: 'Errore nella creazione della tabella nel database' });
+                return;
+            }
+            console.log('Tabella creata nel database:', result);
+        });
+
+        // Inserisci i dati estratti nella nuova tabella
+        data.forEach(player => {
+            const { name, score } = player;
+            const insertQuery = 'INSERT INTO giocatori (nome, punteggio) VALUES (?, ?)';
+            db.query(insertQuery, [name, score], (err, result) => {
+                if (err) {
+                    console.error('Errore nell\'inserimento dei dati nel database:', err);
+                    return;
+                }
+                console.log('Dati inseriti nel database:', result);
+            });
+        });
+
+        res.status(200).json({ message: 'Scraping completato e tabella creata nel database' });
+    } catch (error) {
+        console.error('Errore durante lo scraping:', error);
+        res.status(500).json({ error: 'Errore durante lo scraping' });
+    }
+});
 // porta del server
 const PORT = 3000;
 app.listen(PORT, () => {
